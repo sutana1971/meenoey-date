@@ -915,6 +915,16 @@ document.querySelectorAll('[data-jump]').forEach(b => b.addEventListener('click'
 
 /* ---------- เริ่ม ---------- */
 (function start() {
+  // เปิดลิงก์ ...?logout = ลืม PIN ในเครื่องนี้ แล้วกลับไปหน้าใส่ PIN
+  if (new URLSearchParams(location.search).has('logout')) {
+    try {
+      localStorage.removeItem('date-pin');
+      localStorage.removeItem(`date-${CONFIG.date}-${CONFIG.pin}`);
+      sessionStorage.removeItem('date-admin');
+    } catch {}
+    history.replaceState(null, '', location.pathname);
+  }
+
   let saved = '', admin = false;
   try {
     saved = localStorage.getItem('date-pin') || '';
