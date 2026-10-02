@@ -8,7 +8,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<script>
+  // ใส่เลขเวลาต่อท้ายไฟล์ → มือถือโหลดไฟล์ล่าสุดทุกครั้ง (GitHub Pages ชอบจำไฟล์เก่าไว้ 10 นาที)
+  window.V = Date.now();
+  document.write('<link rel="stylesheet" href="style.css?v=' + V + '">');
+</script>
+<noscript><link rel="stylesheet" href="style.css"></noscript>
 </head>
 <body>
 <div id="bg" aria-hidden="true"></div>
@@ -183,7 +188,13 @@
   <button class="lb-close" id="lb-close" type="button" aria-label="ปิด">✕</button>
 </div>
 
-<script src="config.js"></script>
-<script src="script.js"></script>
+<script>
+  ['config.js', 'script.js'].forEach(function (f) {
+    var s = document.createElement('script');
+    s.src = f + '?v=' + V;
+    s.async = false; // โหลดตามลำดับ config ก่อน script
+    document.body.appendChild(s);
+  });
+</script>
 </body>
 </html>

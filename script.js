@@ -880,11 +880,8 @@ async function unlock(pin, isAdmin, instant) {
   PIN = pin;
   if (isAdmin) {
     testMode = true;
-    try { sessionStorage.setItem('date-admin', '1'); } catch {}
     document.body.classList.add('admin');
     $('#admin-bar').hidden = false;
-  } else if (pin) {
-    try { localStorage.setItem('date-pin', pin); } catch {} // ครั้งหน้าไม่ต้องใส่ใหม่
   }
   if (!instant) {
     $('#keypad').dataset.busy = '1';
@@ -905,34 +902,26 @@ const hhmmss = t => new Date(t).toLocaleTimeString('en-GB', { timeZone: 'Asia/Ba
 document.querySelectorAll('[data-jump]').forEach(b => b.addEventListener('click', () => {
   const j = b.dataset.jump;
   if (j === 'exit') {
-    try { sessionStorage.removeItem('date-admin'); } catch {}
     location.href = location.pathname;
     return;
   }
+  // ให้หน้าถัดไปข้าม PIN ได้ครั้งเดียว (รีเฟรชเองยังต้องใส่ PIN)
+  try { sessionStorage.setItem('date-admin-jump', '1'); } catch {}
   const t = j === 'drive' ? PICKUP - 15000 : j === 'date' ? PICKUP + 60000 : LETTER - 10000;
   location.href = `${location.pathname}?at=${hhmmss(t)}`;
 }));
 
 /* ---------- เริ่ม ---------- */
+// ต้องใส่ PIN ใหม่ทุกครั้งที่เปิด/รีเฟรช
 (function start() {
-  // เปิดลิงก์ ...?logout = ลืม PIN ในเครื่องนี้ แล้วกลับไปหน้าใส่ PIN
-  if (new URLSearchParams(location.search).has('logout')) {
-    try {
-      localStorage.removeItem('date-pin');
-      localStorage.removeItem(`date-${CONFIG.date}-${CONFIG.pin}`);
-      sessionStorage.removeItem('date-admin');
-    } catch {}
-    history.replaceState(null, '', location.pathname);
-  }
-
-  let saved = '', admin = false;
+  let jump = false;
   try {
-    saved = localStorage.getItem('date-pin') || '';
-    admin = sessionStorage.getItem('date-admin') === '1';
+    localStorage.removeItem('date-pin'); // ล้าง PIN ที่เวอร์ชันก่อนเคยจำไว้
+    jump = sessionStorage.getItem('date-admin-jump') === '1';
+    sessionStorage.removeItem('date-admin-jump');
   } catch {}
   if (!CONFIG.pin) return unlock('', false, true); // ไม่ตั้ง PIN = เข้าได้เลย
-  if (admin && CONFIG.adminPin) return unlock(String(CONFIG.adminPin), true, true);
-  if (saved === String(CONFIG.pin)) return unlock(saved, false, true);
+  if (jump && CONFIG.adminPin) return unlock(String(CONFIG.adminPin), true, true);
   drawDots();
   show('s-pin');
 })();
